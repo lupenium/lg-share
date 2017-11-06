@@ -1,0 +1,18 @@
+.lg-outer {
+    #lg-share-whatsapp {
+        .lg-icon {
+            color: #128c7e;
+            &:after {
+                content: "\ea93";
+            }
+        }
+    }
+    #lg-share-linkedin {
+        .lg-icon {
+            color: #0077b5;
+            &:after {
+                content: "\eac9";
+            }
+        }
+    }
+}

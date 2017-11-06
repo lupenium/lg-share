@@ -27,8 +27,8 @@ module.exports = function(grunt) {
         umd: {
             all: {
                 options: {
-                    src: 'src/<%= pkg.name %>.js',
-                    dest: 'dist/<%= pkg.name %>.js',
+                    src: 'src/js/<%= pkg.name %>.js',
+                    dest: 'dist/js/<%= pkg.name %>.js',
                     deps: {
                         args : ['$'],
                         'default': ['$'],
@@ -68,8 +68,27 @@ module.exports = function(grunt) {
                     linebreak: true
                 },
                 files: {
-                    src: ['dist/<%= pkg.name %>.js']
+                    src: ['dist/js/<%= pkg.name %>.js']
                 }
+            }
+        },
+
+        cssmin: {
+            target: {
+                files: [{
+                    'dist/css/<%= pkg.name %>.min.css': ['dist/css/<%= pkg.name %>.css']
+                }]
+            }
+        },
+
+        copy: {
+            main: {
+                files: [{
+                    expand: true,
+                    cwd: 'src/fonts/',
+                    src: ['**'],
+                    dest: 'dist/fonts/'
+                }]
             }
         },
 
@@ -80,14 +99,15 @@ module.exports = function(grunt) {
             },
             dist: {
                 files: [{
-                    src: 'dist/<%= pkg.name %>.js',
-                    dest: 'dist/<%= pkg.name %>.min.js'
+                    src: 'dist/js/<%= pkg.name %>.js',
+                    dest: 'dist/js/<%= pkg.name %>.min.js'
                 }]
             }
         },
         jshint: {
             options: {
-                reporter: require('jshint-stylish')
+                reporter: require('jshint-stylish'),
+                reporterOutput: ''
             },
             gruntfile: {
                 options: {
@@ -100,6 +120,16 @@ module.exports = function(grunt) {
                     jshintrc: 'src/.jshintrc'
                 },
                 src: ['src/**/*.js']
+            }
+        },
+        sass: {
+            options: { // Target options
+                style: 'expanded'
+            },
+            dist: {
+                files: {
+                    'dist/css/lg-share.css': 'src/sass/lg-share.scss'
+                }
             }
         },
         watch: {
@@ -127,7 +157,7 @@ module.exports = function(grunt) {
     });
 
     // Default task.
-    grunt.registerTask('default', ['jshint', 'connect', 'umd:all', 'uglify'/*, 'watch'*/, 'usebanner']);
+    grunt.registerTask('default', ['clean', 'jshint', 'connect', 'umd:all', 'uglify'/*, 'watch'*/, 'sass', 'cssmin', 'copy', 'usebanner']);
     grunt.registerTask('server', function() {
         grunt.log.warn('The `server` task has been deprecated. Use `grunt serve` to start a server.');
         grunt.task.run(['serve']);
