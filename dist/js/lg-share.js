@@ -1,4 +1,4 @@
-/*! lg-share - v1.1.1 - 2017-11-10
+/*! lg-share - v1.2.0 - 2017-11-10
 * http://sachinchoolur.github.io/lightGallery
 * Copyright (c) 2017 Sachin N; Licensed GPLv3 */
 
@@ -138,15 +138,16 @@
         return shareProp
     }
 
-    Share.prototype.addNetworkShareUrl = function(index, networkName, url) {
+    Share.prototype.addNetworkShareUrl = function(index, name, url) {
         var _this = this,
+            networkName = name.toLowerCase(),
             urlComplete = replaceWithObject(url, {
                 'url': (encodeURIComponent(_this.getShareProps(index, networkName + 'ShareUrl') || window.location.href)),
                 'text': (_this.getShareProps(index, networkName + 'Text') || ''),
                 'media': encodeURIComponent(_this.getShareProps(index, 'src'))
             })
 
-        $('#lg-share-' + networkName.toLowerCase()).attr('href', urlComplete)
+        $('#lg-share-' + networkName).attr('href', urlComplete)
     }
 
     Share.prototype.destroy = function() {

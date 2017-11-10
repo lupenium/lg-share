@@ -118,15 +118,16 @@
         return shareProp
     }
 
-    Share.prototype.addNetworkShareUrl = function(index, networkName, url) {
+    Share.prototype.addNetworkShareUrl = function(index, name, url) {
         var _this = this,
+            networkName = name.toLowerCase(),
             urlComplete = replaceWithObject(url, {
                 'url': (encodeURIComponent(_this.getShareProps(index, networkName + 'ShareUrl') || window.location.href)),
                 'text': (_this.getShareProps(index, networkName + 'Text') || ''),
                 'media': encodeURIComponent(_this.getShareProps(index, 'src'))
             })
 
-        $('#lg-share-' + networkName.toLowerCase()).attr('href', urlComplete)
+        $('#lg-share-' + networkName).attr('href', urlComplete)
     }
 
     Share.prototype.destroy = function() {
