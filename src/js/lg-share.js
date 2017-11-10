@@ -1,5 +1,4 @@
 (function() {
-
     'use strict'
 
     var defaults = {
@@ -45,7 +44,7 @@
         },
         {
             name: 'whatsapp',
-            url: 'whatsapp://send?text={url}',
+            url: 'whatsapp://send?text={text} {url}',
             mobileOnly: true
         }
 
@@ -65,57 +64,6 @@
         return this
     }
 
-    var createShareLink = function(id, text) {
-        var $list = $('<li />'),
-            $link = $('<a />').attr({
-                'id': 'lg-share-' + id.toLowerCase(),
-                'target': '_blank'
-            }),
-            $text = $('<span />').attr('class', 'lg-icon'),
-            $icon = $('<span />').attr('class', 'lg-dropdown-text').text(text)
-
-            $link.append([$text, $icon]).appendTo($list)
-
-        return $list
-    }
-
-    var replaceWithObject = function(string, object) {
-        return string.replace ? string.replace(/\{\s*([^|}]+?)\s*(?:\|([^}]*))?\s*\}/g, function (match, key) {
-            return typeof object[key] === 'undefined' ? match : object[key]
-        }) : string
-    }
-
-    var addNetworkShareUrl = function (index, networkName, url) {
-        var _this = this,
-            completeUrl = replaceWithObject(url, {
-                'url': (encodeURIComponent(_this.getShareProps(index, networkName + 'ShareUrl') || window.location.href)),
-                'text': (_this.getShareProps(index, networkName + 'Text') || ''),
-                'media': encodeURIComponent(_this.getShareProps(index, 'src'))
-            })
-
-        $('#lg-share-' + networkName.toLowerCase()).attr('href', completeUrl)
-    }
-
-    var isMobile = function () {
-        var userAgent = navigator.userAgent || navigator.vendor || window.opera
-
-        // Windows Phone must come first because its UA also contains "Android"
-        if (/windows phone/i.test(userAgent)) {
-            return true
-        }
-
-        if (/android/i.test(userAgent)) {
-            return true
-        }
-
-        // iOS detection from: http://stackoverflow.com/a/9039885/177710
-        if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-            return true
-        }
-
-        return false
-    }
-
     Share.prototype.init = function() {
         var _this = this,
             $share = $('<span />').attr({
@@ -125,12 +73,13 @@
             $list = $('<ul />').attr({
                 'class': 'lg-dropdown',
                 'style': 'position: absolute;'
+            }),
+            networks = socialNetworks.filter(function(network) {
+                return _this.core.s.hasOwnProperty(network.name) && _this.core.s[network.name] && (isMobile() || !network.mobileOnly)
             })
 
-        socialNetworks.forEach(function(network){
-            if (_this.core.s.hasOwnProperty(network.name) && _this.core.s[network.name] && (isMobile() || !network.mobileOnly) ) {
-                $list.append(createShareLink(network.name, _this.core.s[network.name + 'DropdownText']))
-            }
+        networks.forEach(function(network) {
+            $list.append(createShareItem(network.name, _this.core.s[network.name + 'DropdownText']))
         })
 
         $list.appendTo($share)
@@ -147,13 +96,9 @@
         })
 
         _this.core.$el.on('onAfterSlide.lg.tm', function(event, prevIndex, index) {
-
             setTimeout(function() {
-
-                socialNetworks.forEach(function(network){
-                    if (_this.core.s.hasOwnProperty(network.name) && _this.core.s[network.name]){
+                networks.forEach(function(network) {
                     addNetworkShareUrl.call(_this, index, network.name, network.url)
-                    }
                 })
 
             }, 100)
@@ -179,6 +124,44 @@
     }
 
     $.fn.lightGallery.modules.share = Share
+
+    /* Helpers  */
+    function createShareItem(id, text) {
+        var $list = $('<li />'),
+            $link = $('<a />').attr({
+                'id': 'lg-share-' + id.toLowerCase(),
+                'target': '_blank'
+            }),
+            $text = $('<span />').attr('class', 'lg-icon'),
+            $icon = $('<span />').attr('class', 'lg-dropdown-text').text(text)
+
+            $link.append([$text, $icon]).appendTo($list)
+
+        return $list
+    }
+
+    function replaceWithObject(string, object) {
+        return string.replace ? string.replace(/\{\s*([^|}]+?)\s*(?:\|([^}]*))?\s*\}/g, function (match, key) {
+            return typeof object[key] === 'undefined' ? match : object[key]
+        }) : string
+    }
+
+    function addNetworkShareUrl(index, networkName, url) {
+        var _this = this,
+            completeUrl = replaceWithObject(url, {
+                'url': (encodeURIComponent(_this.getShareProps(index, networkName + 'ShareUrl') || window.location.href)),
+                'text': (_this.getShareProps(index, networkName + 'Text') || ''),
+                'media': encodeURIComponent(_this.getShareProps(index, 'src'))
+            })
+
+        $('#lg-share-' + networkName.toLowerCase()).attr('href', completeUrl)
+    }
+
+    function isMobile () {
+        var userAgent = navigator.userAgent || navigator.vendor || window.opera
+
+        return (/windows phone/i.test(userAgent)) || (/android/i.test(userAgent)) || (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream)
+    }
 
 })();
 
